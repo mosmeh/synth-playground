@@ -58,6 +58,8 @@ function Oscilloscope({ runner }) {
     );
 }
 
+const MIN_FREQ = Math.log10(10);
+
 function SpectrumAnalyzer({ runner }) {
     const canvasRef = useRef();
 
@@ -68,22 +70,32 @@ function SpectrumAnalyzer({ runner }) {
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            context.fillStyle = '#007aff';
+            context.lineWidth = 1.5;
+            context.strokeStyle = '#007aff';
 
             const dataArray = runner.getByteFrequencyData();
-            const bins = Math.min(40, dataArray.length);
 
-            const barWidth = Math.floor(canvas.width / bins);
-            let x = 0;
-            for (let i = 0; i < bins; ++i) {
-                const barHeight = (dataArray[i] / 255) * canvas.height;
-                context.fillRect(
-                    x,
-                    canvas.height - barHeight,
-                    barWidth - 1,
-                    barHeight
-                );
-                x += barWidth;
+            // DC bias
+            const x = context.lineWidth / 2;
+            const y = (canvas.height * (255 - dataArray[0])) / 255;
+            context.beginPath();
+            context.moveTo(x, y);
+            context.lineTo(x, canvas.height);
+            context.stroke();
+
+            const maxFreq = Math.log10(runner.sampleRate / 2); // Nyquist frequency
+            const binWidth = maxFreq - Math.log10(dataArray.length);
+
+            for (let i = 1; i < dataArray.length; ++i) {
+                const x =
+                    (canvas.width * (Math.log10(i) + binWidth - MIN_FREQ)) /
+                    (maxFreq - MIN_FREQ);
+                const y = (canvas.height * (255 - dataArray[i])) / 255;
+
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x, canvas.height);
+                context.stroke();
             }
 
             requestId = requestAnimationFrame(draw);

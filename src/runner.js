@@ -2,7 +2,7 @@ import scriptProcessorScript from '!!raw-loader!./script-processor';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const OSC_FFT_SIZE = 1024;
-const SPECTRUM_FFT_SIZE = 128;
+const SPECTRUM_FFT_SIZE = 2048;
 
 export default class Runner {
     constructor(script) {
@@ -23,7 +23,7 @@ export default class Runner {
         this._spectrumAnalyser.maxDecibels = -10;
         this._spectrumAnalyser.fftSize = SPECTRUM_FFT_SIZE;
         this._gainNode.connect(this._spectrumAnalyser);
-        this._spectrumArray = new Uint8Array(SPECTRUM_FFT_SIZE);
+        this._spectrumArray = new Uint8Array(SPECTRUM_FFT_SIZE / 2);
 
         this._scriptNode = null;
 
@@ -83,6 +83,10 @@ export default class Runner {
 
     set volume(value) {
         this._gainNode.gain.value = value;
+    }
+
+    get sampleRate() {
+        return this._audioContext.sampleRate;
     }
 
     getByteTimeDomainData() {
