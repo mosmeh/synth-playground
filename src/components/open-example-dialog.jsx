@@ -23,15 +23,11 @@ export default function OpenExampleDialog({
             isOpen={isOpen}
             onRequestClose={onRequestClose}
         >
-            <div className="header-area">
-                <div className="content">Choose an example</div>
-            </div>
-            <ul className="item-list">{items}</ul>
-            <div className="button-area">
-                <div className="button" onClick={onRequestClose}>
-                    Close
-                </div>
-            </div>
+            <div className="message">Choose an example</div>
+            <ul className="list">{items}</ul>
+            <button className="close" onClick={onRequestClose}>
+                Close
+            </button>
         </Modal>
     );
 }

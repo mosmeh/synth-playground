@@ -53,7 +53,7 @@ function Oscilloscope({ runner }) {
             ref={canvasRef}
             className="oscilloscope"
             width="250"
-            height="47"
+            height="48"
         />
     );
 }
@@ -98,7 +98,7 @@ function SpectrumAnalyzer({ runner }) {
             ref={canvasRef}
             className="spectrum-analyzer"
             width="250"
-            height="47"
+            height="48"
         />
     );
 }

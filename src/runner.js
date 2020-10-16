@@ -1,7 +1,7 @@
 import scriptProcessorScript from '!!raw-loader!./script-processor';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-const OSC_FFT_SIZE = 2048;
+const OSC_FFT_SIZE = 1024;
 const SPECTRUM_FFT_SIZE = 128;
 
 export default class Runner {
