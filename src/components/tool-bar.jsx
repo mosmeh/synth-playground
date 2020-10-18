@@ -1,13 +1,15 @@
 import React, { useCallback, useRef } from 'react';
 
-export default function ToolBar({
-    status,
+export function ToolBar({
+    running,
+    recording,
     volume,
     onNew,
     onOpenFile,
     onOpenExample,
     onRun,
     onStop,
+    onRecord,
     onVolumeChange,
 }) {
     return (
@@ -24,12 +26,18 @@ export default function ToolBar({
                 onClick={onOpenExample}
             />
             <Spacer />
-            <Button label="Run" icon="play_arrow" onClick={onRun} />
             <Button
-                label="Stop"
-                icon="stop"
-                disabled={status !== 'running'}
-                onClick={onStop}
+                label="Run"
+                icon="play_arrow"
+                highlighted={running}
+                onClick={onRun}
+            />
+            <Button label="Stop" icon="stop" onClick={onStop} />
+            <Button
+                label="Rec"
+                icon="fiber_manual_record"
+                highlighted={recording}
+                onClick={onRecord}
             />
             <Volume value={volume} onChange={onVolumeChange} />
         </div>
@@ -40,9 +48,12 @@ function Spacer() {
     return <div className="spacer" />;
 }
 
-function Button({ label, icon, disabled = false, onClick }) {
+function Button({ label, icon, highlighted = false, onClick }) {
     return (
-        <button className="foldable" disabled={disabled} onClick={onClick}>
+        <button
+            className={`foldable ${highlighted ? 'highlighted' : ''}`}
+            onClick={onClick}
+        >
             <p>
                 <i className="material-icons">{icon}</i>
                 <span>{label}</span>

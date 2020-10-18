@@ -5,14 +5,17 @@ import React, {
     forwardRef,
 } from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import workletLibScript from '!!raw-loader!../worklet-lib';
+import AUDIO_WORKLET_LIB from '!!raw-loader!../audio-worklet-lib';
 
 const OPTIONS = {
     automaticLayout: true,
     scrollBeyondLastLine: false,
 };
 
-function Editor({ value, onChange, onRun, onStop }, ref) {
+export const Editor = forwardRef(function Editor(
+    { value, onChange, onRun, onStop },
+    ref
+) {
     const handleEditorWillMount = useCallback((monaco) => {
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ESNext,
@@ -33,7 +36,7 @@ function Editor({ value, onChange, onRun, onStop }, ref) {
         });
 
         monaco.languages.typescript.javascriptDefaults.addExtraLib(
-            workletLibScript
+            AUDIO_WORKLET_LIB
         );
     }, []);
 
@@ -76,6 +79,4 @@ function Editor({ value, onChange, onRun, onStop }, ref) {
             />
         </div>
     );
-}
-
-export default Editor = forwardRef(Editor);
+});

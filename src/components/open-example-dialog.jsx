@@ -2,11 +2,7 @@ import React, { useMemo } from 'react';
 import Modal from 'react-modal';
 import { EXAMPLES } from '../examples';
 
-export default function OpenExampleDialog({
-    isOpen,
-    onRequestClose,
-    onSelect,
-}) {
+export function OpenExampleDialog({ isOpen, onRequestClose, onSelect }) {
     const items = useMemo(
         () =>
             Object.keys(EXAMPLES).map((name) => (

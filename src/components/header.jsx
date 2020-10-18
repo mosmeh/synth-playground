@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Header({ left, right }) {
+export function Header({ left, right }) {
     return (
         <div className="header">
             <div className="left">{left}</div>

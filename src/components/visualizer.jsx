@@ -1,19 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
-export default function Visualizer({ runner }) {
+export function Visualizer({ analyzer }) {
     return (
         <div className="visualizer">
-            <Oscilloscope runner={runner} />
-            <SpectrumAnalyzer runner={runner} />
+            <Oscilloscope analyzer={analyzer} />
+            <SpectrumAnalyzer analyzer={analyzer} />
         </div>
     );
 }
 
-function Oscilloscope({ runner }) {
+function Oscilloscope({ analyzer }) {
     const canvasRef = useRef();
 
     useEffect(() => {
-        let requestId;
+        let requestId = null;
         function draw() {
             const canvas = canvasRef.current;
             const context = canvas.getContext('2d');
@@ -23,7 +23,14 @@ function Oscilloscope({ runner }) {
             context.strokeStyle = '#007aff';
             context.beginPath();
 
-            const dataArray = runner.getByteTimeDomainData();
+            if (analyzer === null) {
+                context.moveTo(0, canvas.height / 2);
+                context.lineTo(canvas.width, canvas.height / 2);
+                context.stroke();
+                return;
+            }
+
+            const dataArray = analyzer.getByteTimeDomainData();
 
             const sliceWidth = canvas.width / dataArray.length;
             let x = 0;
@@ -46,7 +53,7 @@ function Oscilloscope({ runner }) {
         draw();
 
         return () => cancelAnimationFrame(requestId);
-    }, [runner]);
+    }, [analyzer]);
 
     return (
         <canvas
@@ -60,20 +67,24 @@ function Oscilloscope({ runner }) {
 
 const MIN_FREQ = Math.log10(10);
 
-function SpectrumAnalyzer({ runner }) {
+function SpectrumAnalyzer({ analyzer }) {
     const canvasRef = useRef();
 
     useEffect(() => {
-        let requestId;
+        let requestId = null;
         function draw() {
             const canvas = canvasRef.current;
             const context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
 
+            if (analyzer === null) {
+                return;
+            }
+
             context.lineWidth = 1.5;
             context.strokeStyle = '#007aff';
 
-            const dataArray = runner.getByteFrequencyData();
+            const dataArray = analyzer.getByteFrequencyData();
 
             // DC bias
             const x = context.lineWidth / 2;
@@ -83,7 +94,7 @@ function SpectrumAnalyzer({ runner }) {
             context.lineTo(x, canvas.height);
             context.stroke();
 
-            const maxFreq = Math.log10(runner.sampleRate / 2); // Nyquist frequency
+            const maxFreq = Math.log10(analyzer.sampleRate / 2); // Nyquist frequency
             const binWidth = maxFreq - Math.log10(dataArray.length);
 
             for (let i = 1; i < dataArray.length; ++i) {
@@ -103,7 +114,7 @@ function SpectrumAnalyzer({ runner }) {
         draw();
 
         return () => cancelAnimationFrame(requestId);
-    }, [runner]);
+    }, [analyzer]);
 
     return (
         <canvas

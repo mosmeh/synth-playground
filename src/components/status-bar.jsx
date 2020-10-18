@@ -1,11 +1,13 @@
 import React from 'react';
 
-export default function StatusBar({ status }) {
+export function StatusBar({ status }) {
     return <div className={`statusbar ${status}`}>{getMessage(status)}</div>;
 }
 
 function getMessage(status) {
     switch (status) {
+        case 'starting':
+            return 'Starting the script';
         case 'running':
             return 'Running';
         case 'stopped':

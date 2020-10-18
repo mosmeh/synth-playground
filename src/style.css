@@ -59,20 +59,37 @@ button,
 
 .toolbar button {
     color: #007aff;
+    background-color: #fff;
     padding: 0 8px;
     margin: 0px 8px 0px 0;
-    background-color: #fff;
     border: 1px solid #f0f0f0;
     cursor: pointer;
 }
 
 .toolbar button:hover {
+    color: #007aff;
     background-color: #f0f0f0;
 }
 
-.toolbar button:disabled {
-    background-color: #999;
+.toolbar button.highlighted {
     color: #fff;
+    background-color: #007af4;
+}
+
+.toolbar button.highlighted:hover {
+    color: #fff;
+    background-color: #006ae4;
+}
+
+.toolbar button:active,
+.toolbar button.highlighted:active {
+    color: #007aff;
+    background-color: #d7d7d7;
+}
+
+.toolbar button:disabled {
+    color: #fff;
+    background-color: #999;
     cursor: default;
 }
 
@@ -92,20 +109,20 @@ button,
     padding-left: 3px;
 }
 
-@media screen and (max-width: 1218px) {
+@media screen and (max-width: 1284px) {
     .oscilloscope {
         display: none;
     }
 }
 
-@media screen and (max-width: 965px) {
+@media screen and (max-width: 1031px) {
     .title,
     button.foldable span {
         display: none;
     }
 }
 
-@media screen and (max-width: 695px) {
+@media screen and (max-width: 741px) {
     .spectrum-analyzer {
         display: none;
     }
@@ -124,7 +141,8 @@ button,
     line-height: 24px;
 }
 
-.statusbar.stopped {
+.statusbar.stopped,
+.statusbar.starting {
     background-color: #444;
 }
 
@@ -174,6 +192,10 @@ button,
     background-color: #ddd;
 }
 
+.dialog .close:active {
+    background-color: #ccc;
+}
+
 .dialog .list {
     display: block;
     width: 100%;
@@ -207,11 +229,8 @@ button,
     background-color: #f0f0f0;
 }
 
-.toolbar button:active,
-.dialog .list li:active,
-.dialog .close:active {
-    background-color: #007af4;
-    color: #fff;
+.dialog .list li:active {
+    background-color: #d7d7d7;
 }
 
 .toolbar button:focus,
