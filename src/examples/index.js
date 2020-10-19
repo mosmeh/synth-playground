@@ -7,7 +7,7 @@ export const EXAMPLES = {
     'Poly saw': 'poly-saw.js',
     'Moog filter': 'moog-filter.js',
     'Band-limited square': 'band-limited-square.js',
-    'Shadertoy acid jam': 'acid-jam.js',
+    Gunfire: 'gunfire.js',
 };
 
 export async function getExample(name) {
