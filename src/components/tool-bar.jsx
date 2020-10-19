@@ -12,29 +12,45 @@ export function ToolBar({
     onRecord,
     onVolumeChange,
 }) {
+    const isMac = /Mac/i.test(navigator.userAgent);
+    const modKey = isMac ? 'Cmd' : 'Ctrl';
+
     return (
         <div className="toolbar">
             <span className="title">
                 Synth Playground
                 <Spacer />
             </span>
-            <Button label="New" icon="create" onClick={onNew} />
+            <Button
+                label="New"
+                title="New script"
+                icon="create"
+                onClick={onNew}
+            />
             <OpenFileButton onOpen={onOpenFile} />
             <Button
                 label="Example"
+                title="Open example"
                 icon="library_books"
                 onClick={onOpenExample}
             />
             <Spacer />
             <Button
                 label="Run"
+                title={`Run (${modKey}+Enter)`}
                 icon="play_arrow"
                 highlighted={running}
                 onClick={onRun}
             />
-            <Button label="Stop" icon="stop" onClick={onStop} />
+            <Button
+                label="Stop"
+                title={`Stop (${modKey}+.)`}
+                icon="stop"
+                onClick={onStop}
+            />
             <Button
                 label="Rec"
+                title="Record"
                 icon="fiber_manual_record"
                 highlighted={recording}
                 onClick={onRecord}
@@ -48,9 +64,10 @@ function Spacer() {
     return <div className="spacer" />;
 }
 
-function Button({ label, icon, highlighted = false, onClick }) {
+function Button({ label, title = label, icon, highlighted = false, onClick }) {
     return (
         <button
+            title={title}
             className={`foldable ${highlighted ? 'highlighted' : ''}`}
             onClick={onClick}
         >
@@ -79,7 +96,7 @@ function OpenFileButton({ onOpen }) {
     );
 
     return (
-        <button className="foldable" onClick={handleClick}>
+        <button title="Open file" className="foldable" onClick={handleClick}>
             <input
                 ref={ref}
                 type="file"
@@ -104,7 +121,7 @@ function Volume({ value, onChange }) {
     );
 
     return (
-        <span>
+        <span title="Volume">
             <i className="material-icons">volume_mute</i>
             <input
                 type="range"
