@@ -16,36 +16,67 @@ function Oscilloscope({ analyzer }) {
         let requestId = null;
         function draw() {
             const canvas = canvasRef.current;
+            const width = canvas.width;
+            const height = canvas.height;
             const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, width, height);
 
             context.lineWidth = 2;
             context.strokeStyle = '#007aff';
             context.beginPath();
 
             if (analyzer === null) {
-                context.moveTo(0, canvas.height / 2);
-                context.lineTo(canvas.width, canvas.height / 2);
+                context.moveTo(0, height / 2);
+                context.lineTo(width, height / 2);
                 context.stroke();
                 return;
             }
 
-            const dataArray = analyzer.getByteTimeDomainData();
+            const timeData = analyzer.getByteTimeDomainData();
 
-            const sliceWidth = canvas.width / dataArray.length;
-            let x = 0;
-            for (let i = 0; i < dataArray.length; ++i) {
-                const v = dataArray[i] / 128;
-                const y = (v * canvas.height) / 2;
-                if (i === 0) {
-                    context.moveTo(x, y);
-                } else {
-                    context.lineTo(x, y);
+            // draw a range of half the window size to prevent right ends of waveforms from being chopped off
+            const drawLength = timeData.length / 2;
+            const sliceWidth = (width / timeData.length) * 2;
+
+            // SidWizPlus' PeakSpeedTrigger
+            // https://github.com/maxim-zhao/SidWizPlus/blob/master/LibSidWiz/Triggers/PeakSpeedTrigger.cs
+
+            let peakValue = Number.NEGATIVE_INFINITY;
+            let shortestDistance = Number.POSITIVE_INFINITY;
+            let triggerIndex = 0;
+            for (let i = 0; i < drawLength; ) {
+                while (timeData[i++] > 128 && i < drawLength);
+                while (timeData[i++] <= 128 && i < drawLength);
+
+                const lastCrossing = i;
+                for (
+                    let sample = timeData[i];
+                    sample > 128 && i < drawLength;
+                    ++i
+                ) {
+                    if (sample > peakValue) {
+                        peakValue = sample;
+                        triggerIndex = lastCrossing;
+                        shortestDistance = i - lastCrossing;
+                    } else if (
+                        sample === peakValue &&
+                        i - lastCrossing < shortestDistance
+                    ) {
+                        triggerIndex = lastCrossing;
+                        shortestDistance = i - lastCrossing;
+                    }
+
+                    sample = timeData[i];
                 }
-                x += sliceWidth;
             }
 
-            context.lineTo(canvas.width, canvas.height / 2);
+            for (
+                let x = 0, i = triggerIndex;
+                x <= width && i < timeData.length;
+                x += sliceWidth, ++i
+            ) {
+                context.lineTo(x, ((255 - timeData[i]) / 255) * height);
+            }
             context.stroke();
 
             requestId = requestAnimationFrame(draw);
@@ -74,8 +105,10 @@ function SpectrumAnalyzer({ analyzer }) {
         let requestId = null;
         function draw() {
             const canvas = canvasRef.current;
+            const width = canvas.width;
+            const height = canvas.height;
             const context = canvas.getContext('2d');
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(0, 0, width, height);
 
             if (analyzer === null) {
                 return;
@@ -84,28 +117,29 @@ function SpectrumAnalyzer({ analyzer }) {
             context.lineWidth = 1.5;
             context.strokeStyle = '#007aff';
 
-            const dataArray = analyzer.getByteFrequencyData();
+            const freqData = analyzer.getByteFrequencyData();
 
             // DC bias
             const x = context.lineWidth / 2;
-            const y = (canvas.height * (255 - dataArray[0])) / 255;
+            const y = (height * (255 - freqData[0])) / 255;
             context.beginPath();
             context.moveTo(x, y);
-            context.lineTo(x, canvas.height);
+            context.lineTo(x, height);
             context.stroke();
 
             const maxFreq = Math.log10(analyzer.sampleRate / 2); // Nyquist frequency
-            const binWidth = maxFreq - Math.log10(dataArray.length);
+            const binWidth = maxFreq - Math.log10(freqData.length);
 
-            for (let i = 1; i < dataArray.length; ++i) {
+            for (let i = 1; i < freqData.length; ++i) {
                 const x =
-                    (canvas.width * (Math.log10(i) + binWidth - MIN_FREQ)) /
-                    (maxFreq - MIN_FREQ);
-                const y = (canvas.height * (255 - dataArray[i])) / 255;
+                    ((Math.log10(i) + binWidth - MIN_FREQ) /
+                        (maxFreq - MIN_FREQ)) *
+                    width;
+                const y = ((255 - freqData[i]) / 255) * height;
 
                 context.beginPath();
                 context.moveTo(x, y);
-                context.lineTo(x, canvas.height);
+                context.lineTo(x, height);
                 context.stroke();
             }
 
