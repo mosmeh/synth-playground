@@ -114,18 +114,12 @@ function SpectrumAnalyzer({ analyzer }) {
                 return;
             }
 
-            context.lineWidth = 1.5;
-            context.strokeStyle = '#007aff';
-
             const freqData = analyzer.getByteFrequencyData();
 
             // DC bias
-            const x = context.lineWidth / 2;
-            const y = (height * (255 - freqData[0])) / 255;
+            const y = ((255 - freqData[0]) / 255) * height;
             context.beginPath();
-            context.moveTo(x, y);
-            context.lineTo(x, height);
-            context.stroke();
+            context.moveTo(0, y);
 
             const maxFreq = Math.log10(analyzer.sampleRate / 2); // Nyquist frequency
             const binWidth = maxFreq - Math.log10(freqData.length);
@@ -137,11 +131,15 @@ function SpectrumAnalyzer({ analyzer }) {
                     width;
                 const y = ((255 - freqData[i]) / 255) * height;
 
-                context.beginPath();
-                context.moveTo(x, y);
-                context.lineTo(x, height);
-                context.stroke();
+                context.lineTo(x, y);
             }
+
+            context.lineTo(width, height);
+            context.lineTo(0, height);
+            context.closePath();
+
+            context.fillStyle = '#007aff';
+            context.fill();
 
             requestId = requestAnimationFrame(draw);
         }
