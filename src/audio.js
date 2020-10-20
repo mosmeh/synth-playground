@@ -14,7 +14,6 @@ export class ScriptRunner {
 
     async disposeAsync() {
         if (this._context.state !== 'closed') {
-            this.stopScript();
             await this._context.close();
         }
     }
@@ -41,25 +40,18 @@ export class ScriptRunner {
                 }
             );
         } catch (e) {
-            this.stopScript();
+            await this.disposeAsync();
             this.onerror(e);
             throw e;
         } finally {
             URL.revokeObjectURL(url);
         }
 
-        this._scriptNode.onprocessorerror = (e) => {
-            this.stopScript();
+        this._scriptNode.onprocessorerror = async (e) => {
+            await this.disposeAsync();
             this.onerror(e);
         };
         this._scriptNode.connect(this._outputNode);
-    }
-
-    stopScript() {
-        if (this._scriptNode !== null) {
-            this._scriptNode.disconnect();
-            this._scriptNode = null;
-        }
     }
 
     get outputNode() {

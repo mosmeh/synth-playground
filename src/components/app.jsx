@@ -151,7 +151,10 @@ export function App() {
                 break;
             case 'stopped':
                 if (runner !== null) {
-                    runner.stopScript();
+                    runner.disposeAsync();
+                    setRunner(null);
+                    setSpeaker(null);
+                    setAnalyzer(null);
                 }
                 break;
         }
