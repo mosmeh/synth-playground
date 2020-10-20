@@ -199,6 +199,7 @@ export function App() {
     useEventListener('drop', (e) => {
         e.preventDefault();
         if (e.dataTransfer.files.length > 0) {
+            setDialogIsOpen(false);
             openFile(e.dataTransfer.files[0]);
         }
     });
