@@ -1,11 +1,11 @@
-const AMP = 0.2;
+// Based on https://mohayonao.github.io/web-audio-sound-examples/#fm-bell/1
 
-// https://mohayonao.github.io/web-audio-sound-examples/#fm-bell/1
+const AMP = 0.2;
 const DURATION = 4;
 const COLOR = 8;
 const T1 = DURATION * 0.5;
 const T2 = T1 + DURATION * 0.5;
-const FREQ = 440;
+const FREQ = mtof(60);
 
 let t = 0;
 let phase1 = 0;
@@ -24,4 +24,8 @@ function loop(bufferSize, outL, outR) {
         phase1 += (2 * Math.PI * (FREQ + op2)) / sampleRate;
         t += 1 / sampleRate;
     }
+}
+
+function mtof(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
 }

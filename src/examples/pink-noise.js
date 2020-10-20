@@ -1,6 +1,7 @@
+// Adapted from  http://noisehack.com/generate-noise-web-audio-api/
+
 const AMP = 0.2;
 
-// http://noisehack.com/generate-noise-web-audio-api/
 let b0 = 0;
 let b1 = 0;
 let b2 = 0;

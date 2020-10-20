@@ -1,6 +1,7 @@
 const AMP = 0.3;
 
-// https://www.musicdsp.org/en/latest/Filters/26-moog-vcf-variation-2.html
+// Adapted from https://www.musicdsp.org/en/latest/Filters/26-moog-vcf-variation-2.html
+
 class MoogFilter {
     constructor(cutoff, resonance) {
         this.cutoff = cutoff || 1;

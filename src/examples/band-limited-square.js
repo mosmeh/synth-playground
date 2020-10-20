@@ -1,3 +1,5 @@
+// Based on https://mohayonao.github.io/web-audio-sound-examples/#coin/1
+
 const AMP = 0.2;
 let t = 0;
 
@@ -10,7 +12,7 @@ function loop(bufferSize, outL, outR) {
     }
 }
 
-// https://github.com/Archie3d/qmusic/blob/master/source/plugins/au-generator/src/Generator.cpp
+// Based on https://github.com/Archie3d/qmusic/blob/master/source/plugins/au-generator/src/Generator.cpp
 
 function square(f, t) {
     const PULSE_WIDTH = 0.5;

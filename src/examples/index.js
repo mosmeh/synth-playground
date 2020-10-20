@@ -2,12 +2,13 @@ export const EXAMPLES = {
     'Persistent sine': 'persistent-sine.js',
     'Decaying sine': 'decaying-sine.js',
     'Hi-hat': 'hihat.js',
-    'Pink noise': 'pink-noise.js',
-    'FM bell': 'fm-bell.js',
+    'Complex Hi-hat': 'complex-hihat.js',
     'Poly saw': 'poly-saw.js',
-    'Moog filter': 'moog-filter.js',
+    'FM bell': 'fm-bell.js',
     'Band-limited square': 'band-limited-square.js',
+    'Pink noise': 'pink-noise.js',
     Gunfire: 'gunfire.js',
+    'Moog filter': 'moog-filter.js',
 };
 
 export async function getExample(name) {

@@ -1,4 +1,4 @@
-// https://webaudio.prototyping.bbc.co.uk/gunfire/
+// Based on https://webaudio.prototyping.bbc.co.uk/gunfire/
 
 function noise() {
     return 2 * Math.random() - 1;
