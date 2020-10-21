@@ -1,5 +1,10 @@
 {
     "name": "synth-playground",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mosmeh/synth-playground"
+    },
+    "license": "MIT",
     "scripts": {
         "build": "cross-env NODE_ENV=production webpack --mode=production",
         "checkfmt": "prettier --check .",
@@ -10,8 +15,8 @@
     },
     "dependencies": {
         "core-js": "^3.6.5",
-        "react": "^16.14.0",
-        "react-dom": "^16.14.0",
+        "react": "^17.0.0",
+        "react-dom": "^17.0.0",
         "react-modal": "^3.11.2",
         "react-monaco-editor": "^0.40.0",
         "regenerator-runtime": "^0.13.7"
@@ -28,8 +33,8 @@
         "eslint": "^7.11.0",
         "eslint-config-google": "^0.14.0",
         "eslint-config-prettier": "^6.13.0",
-        "eslint-plugin-react": "^7.21.4",
-        "eslint-plugin-react-hooks": "^4.1.2",
+        "eslint-plugin-react": "^7.21.5",
+        "eslint-plugin-react-hooks": "^4.2.0",
         "file-loader": "^6.1.1",
         "html-webpack-plugin": "^4.5.0",
         "monaco-editor-webpack-plugin": "^2.0.0",
