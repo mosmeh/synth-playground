@@ -1,6 +1,11 @@
 import PROCESSOR_SCRIPT from '!!raw-loader!./script-processor';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
+navigator.getUserMedia =
+    navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia ||
+    navigator.msGetUserMedia;
 
 export class ScriptRunner {
     constructor(script) {
@@ -8,13 +13,33 @@ export class ScriptRunner {
 
         this._script = script;
         this._context = new AudioContext();
+        this._micGain = this._context.createGain();
+        this._micStream = null;
         this._outputNode = this._context.createGain();
         this._scriptNode = null;
+
+        navigator.getUserMedia(
+            { audio: true },
+            (stream) => {
+                this._micStream = stream;
+                const micInput = this._context.createMediaStreamSource(
+                    this._micStream
+                );
+                micInput.connect(this._micGain);
+            },
+            (e) => console.error(e)
+        );
     }
 
     async disposeAsync() {
         if (this._context.state !== 'closed') {
             await this._context.close();
+        }
+        if (this._micStream !== null) {
+            this._micStream.getTracks().forEach((track) => {
+                track.stop();
+            });
+            this._micStream = null;
         }
     }
 
@@ -34,7 +59,7 @@ export class ScriptRunner {
                 this._context,
                 'script-processor',
                 {
-                    numberOfInputs: 0,
+                    numberOfInputs: 1,
                     numberOfOutputs: 1,
                     outputChannelCount: [2],
                 }
@@ -51,6 +76,8 @@ export class ScriptRunner {
             await this.disposeAsync();
             this.onerror(e);
         };
+
+        this._micGain.connect(this._scriptNode);
         this._scriptNode.connect(this._outputNode);
     }
 
