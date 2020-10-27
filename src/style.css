@@ -66,6 +66,7 @@ button,
     cursor: pointer;
 }
 
+.toolbar button:focus,
 .toolbar button:hover {
     color: #007aff;
     background-color: #f0f0f0;
@@ -76,6 +77,7 @@ button,
     background-color: #007af4;
 }
 
+.toolbar button.highlighted:focus,
 .toolbar button.highlighted:hover {
     color: #fff;
     background-color: #006ae4;
@@ -188,6 +190,7 @@ button,
     border: none;
 }
 
+.dialog .close:focus,
 .dialog .close:hover {
     background-color: #ddd;
 }
@@ -225,6 +228,7 @@ button,
     background-color: #fafafa;
 }
 
+.dialog .list li:focus,
 .dialog .list li:hover {
     background-color: #f0f0f0;
 }
