@@ -43,9 +43,17 @@ function filter(x) {
 }
 
 let t = 0;
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        outL[i] = outR[i] = filter(envelope(t) * noise());
-        t += 1 / sampleRate;
+
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            outL[i] = outR[i] = filter(envelope(t) * noise());
+            t += 1 / sampleRate;
+        }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);

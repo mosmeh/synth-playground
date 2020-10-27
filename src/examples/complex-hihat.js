@@ -36,13 +36,20 @@ function update() {
 }
 update();
 
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        outL[i] = outR[i] = voices.reduce((sum, v) => sum + v.update(), 0);
-        t += 1 / sampleRate;
-        if (t > INTERVAL) {
-            update();
-            t = 0;
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            outL[i] = outR[i] = voices.reduce((sum, v) => sum + v.update(), 0);
+            t += 1 / sampleRate;
+            if (t > INTERVAL) {
+                update();
+                t = 0;
+            }
         }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);

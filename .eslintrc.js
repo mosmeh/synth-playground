@@ -25,17 +25,4 @@ module.exports = {
         'require-jsdoc': 'off',
         'react/prop-types': 'off',
     },
-    overrides: [
-        {
-            files: ['src/examples/*.js'],
-            rules: {
-                'no-unused-vars': [
-                    'error',
-                    {
-                        varsIgnorePattern: 'loop',
-                    },
-                ],
-            },
-        },
-    ],
 };

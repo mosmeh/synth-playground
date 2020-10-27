@@ -3,14 +3,21 @@
 const AMP = 0.2;
 let t = 0;
 
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        const freq = t < 0.075 ? 990 : 1320;
-        const env = t < 0.075 ? 1 : Math.max(0, 1 - (t - 0.075) / 0.825);
-        outL[i] = outR[i] = AMP * env * square(freq, t);
-        t += 1 / sampleRate;
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            const freq = t < 0.075 ? 990 : 1320;
+            const env = t < 0.075 ? 1 : Math.max(0, 1 - (t - 0.075) / 0.825);
+            outL[i] = outR[i] = AMP * env * square(freq, t);
+            t += 1 / sampleRate;
+        }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);
 
 // Based on https://github.com/Archie3d/qmusic/blob/master/source/plugins/au-generator/src/Generator.cpp
 

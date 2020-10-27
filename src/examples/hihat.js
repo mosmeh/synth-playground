@@ -6,16 +6,23 @@ let t = 0;
 let counter = 0;
 let volume = VOLUMES[0];
 
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        const v = AMP * volume * Math.exp(-t / 0.01);
-        outL[i] = v * (2 * Math.random() - 1);
-        outR[i] = v * (2 * Math.random() - 1);
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            const v = AMP * volume * Math.exp(-t / 0.01);
+            outL[i] = v * (2 * Math.random() - 1);
+            outR[i] = v * (2 * Math.random() - 1);
 
-        t += 1 / sampleRate;
-        if (t > 0.125) {
-            t = 0;
-            volume = VOLUMES[++counter % VOLUMES.length];
+            t += 1 / sampleRate;
+            if (t > 0.125) {
+                t = 0;
+                volume = VOLUMES[++counter % VOLUMES.length];
+            }
         }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);

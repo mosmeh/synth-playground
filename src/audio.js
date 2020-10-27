@@ -1,4 +1,4 @@
-import PROCESSOR_SCRIPT from '!!raw-loader!./script-processor';
+import FIX_SAMPLE_PROCESSOR_URL from '!!url-loader!./fix-sample-processor';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -9,7 +9,6 @@ export class ScriptRunner {
         this._script = script;
         this._context = new AudioContext();
         this._outputNode = this._context.createGain();
-        this._scriptNode = null;
     }
 
     async disposeAsync() {
@@ -19,8 +18,7 @@ export class ScriptRunner {
     }
 
     async startScriptAsync() {
-        const workletScript = `${this._script}\n\n${PROCESSOR_SCRIPT}`;
-        const blob = new Blob([workletScript], {
+        const blob = new Blob([this._script], {
             type: 'application/javascript',
         });
         const url = URL.createObjectURL(blob);
@@ -30,15 +28,11 @@ export class ScriptRunner {
                 credentials: 'omit',
             });
 
-            this._scriptNode = new AudioWorkletNode(
-                this._context,
-                'script-processor',
-                {
-                    numberOfInputs: 0,
-                    numberOfOutputs: 1,
-                    outputChannelCount: [2],
-                }
-            );
+            this._scriptNode = new AudioWorkletNode(this._context, 'main', {
+                numberOfInputs: 0,
+                numberOfOutputs: 1,
+                outputChannelCount: [2],
+            });
         } catch (e) {
             await this.disposeAsync();
             this.onerror(e);
@@ -51,7 +45,22 @@ export class ScriptRunner {
             await this.disposeAsync();
             this.onerror(e);
         };
-        this._scriptNode.connect(this._outputNode);
+
+        await this._context.audioWorklet.addModule(FIX_SAMPLE_PROCESSOR_URL, {
+            credentials: 'omit',
+        });
+        this._fixSampleNode = new AudioWorkletNode(
+            this._context,
+            'fix-sample-processor',
+            {
+                numberOfInputs: 1,
+                numberOfOutputs: 1,
+                outputChannelCount: [2],
+            }
+        );
+
+        this._scriptNode.connect(this._fixSampleNode);
+        this._fixSampleNode.connect(this._outputNode);
     }
 
     get outputNode() {

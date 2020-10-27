@@ -59,11 +59,15 @@ class Delay {
     constructor(time, wet, feedback) {
         this.wet = wet || 1;
         this.feedback = feedback || 0;
-        this._buf = new Array(Math.floor(time * sampleRate)).fill(0);
+        this._buf = new Float32Array(65536);
+        this._readPtr = 0;
+        this._writePtr = (time * sampleRate) & 65535;
     }
     process(x) {
-        const x1 = this._buf.shift();
-        this._buf.push(x + this.feedback * x1);
+        const x1 = this._buf[this._readPtr++];
+        this._buf[this._writePtr++] = x + this.feedback * x1;
+        this._readPtr &= 65535;
+        this._writePtr &= 65535;
         return x + this.wet * x1;
     }
 }
@@ -75,20 +79,27 @@ const delay = [new Delay(0.4, 0.5, 0.4), new Delay(0.5, 0.5, 0.4)];
 
 let t = 0;
 
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        const noise = Math.random() * 2 - 1;
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            const noise = Math.random() * 2 - 1;
 
-        lowpass.cutoff = 0.5 * filterEnv.update();
-        const x = ampEnv.update() * lowpass.process(noise);
+            lowpass.cutoff = 0.5 * filterEnv.update();
+            const x = ampEnv.update() * lowpass.process(noise);
 
-        outL[i] = AMP * delay[0].process(x);
-        outR[i] = AMP * delay[1].process(x);
+            outL[i] = AMP * delay[0].process(x);
+            outR[i] = AMP * delay[1].process(x);
 
-        t += 1 / sampleRate;
-        if (t > 1.5) {
-            ampEnv.release();
-            filterEnv.release();
+            t += 1 / sampleRate;
+            if (t > 1.5) {
+                ampEnv.release();
+                filterEnv.release();
+            }
         }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);

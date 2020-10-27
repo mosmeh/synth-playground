@@ -25,8 +25,15 @@ function pink() {
     return out * 0.11;
 }
 
-function loop(bufferSize, outL, outR) {
-    for (let i = 0; i < bufferSize; ++i) {
-        outL[i] = outR[i] = AMP * pink();
+class Processor extends AudioWorkletProcessor {
+    process(_, outputs) {
+        const outL = outputs[0][0];
+        const outR = outputs[0][1];
+        for (let i = 0; i < outL.length; ++i) {
+            outL[i] = outR[i] = AMP * pink();
+        }
+        return true;
     }
 }
+
+registerProcessor('main', Processor);
