@@ -22,6 +22,7 @@ const inisitalState = {
     status: 'stopped',
     recording: false,
     script: localStorage.getItem(SCRIPT_KEY) || DEFAULT_SCRIPT,
+    scriptShouldStart: false,
     editorShouldRefresh: false,
 };
 
@@ -33,6 +34,7 @@ function reducer(state, action) {
                 status: 'stopped',
                 recording: false,
                 script: NEW_SCRIPT,
+                scriptShouldStart: false,
                 editorShouldRefresh: true,
             };
         case 'overwrite_script':
@@ -41,19 +43,22 @@ function reducer(state, action) {
                 status: 'stopped',
                 recording: false,
                 script: action.script,
+                scriptShouldStart: false,
                 editorShouldRefresh: true,
             };
         case 'run':
             return {
                 ...state,
-                status: 'starting',
+                status: 'stopped',
                 recording: false,
+                scriptShouldStart: true,
             };
         case 'stop':
             return {
                 ...state,
                 status: 'stopped',
                 recording: false,
+                scriptShouldStart: false,
             };
         case 'toggle_recording':
             if (state.recording) {
@@ -61,19 +66,29 @@ function reducer(state, action) {
                     ...state,
                     recording: false,
                 };
-            } else if (state.status === 'running') {
-                return {
-                    ...state,
-                    recording: true,
-                };
-            } else {
-                return {
-                    ...state,
-                    status: 'starting',
-                    recording: true,
-                };
             }
-        case 'on_script_start':
+            switch (state.status) {
+                case 'running':
+                case 'starting':
+                    return {
+                        ...state,
+                        recording: true,
+                    };
+                default:
+                    return {
+                        ...state,
+                        status: 'stopped',
+                        recording: true,
+                        scriptShouldStart: true,
+                    };
+            }
+        case 'on_script_starting':
+            return {
+                ...state,
+                status: 'starting',
+                scriptShouldStart: false,
+            };
+        case 'on_script_started':
             return {
                 ...state,
                 status: 'running',
@@ -133,32 +148,38 @@ export function App() {
     // audio
 
     useEffect(() => {
-        switch (state.status) {
-            case 'starting':
-                if (runner !== null) {
-                    runner.disposeAsync();
-                }
+        if (state.scriptShouldStart) {
+            if (runner !== null) {
+                runner.disposeAsync();
+            }
 
-                const newRunner = new ScriptRunner(state.script);
-                newRunner.onerror = () => dispatch({ type: 'on_script_error' });
-                newRunner.startScriptAsync();
+            const newRunner = new ScriptRunner(state.script);
+            newRunner.onerror = () => dispatch({ type: 'on_script_error' });
+            newRunner.startScriptAsync().then(() => {
                 setRunner(newRunner);
 
                 setSpeaker(new Speaker(newRunner.outputNode));
                 setAnalyzer(new Analyzer(newRunner.outputNode));
 
-                dispatch({ type: 'on_script_start' });
-                break;
-            case 'stopped':
-                if (runner !== null) {
-                    runner.disposeAsync();
-                    setRunner(null);
-                    setSpeaker(null);
-                    setAnalyzer(null);
-                }
-                break;
+                dispatch({ type: 'on_script_started' });
+            });
+
+            dispatch({ type: 'on_script_starting' });
+        } else if (state.status === 'stopped') {
+            if (runner !== null) {
+                runner.disposeAsync();
+                setRunner(null);
+                setSpeaker(null);
+                setAnalyzer(null);
+            }
         }
-    }, [runner, state.recording, state.script, state.status]);
+    }, [
+        runner,
+        state.recording,
+        state.script,
+        state.scriptShouldStart,
+        state.status,
+    ]);
 
     useEffect(() => {
         if (speaker !== null) {
