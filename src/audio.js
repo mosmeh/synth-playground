@@ -8,6 +8,7 @@ export class ScriptRunner {
 
         this._script = script;
         this._context = new AudioContext();
+        this._scriptNode = null;
         this._outputNode = this._context.createGain();
     }
 
@@ -61,6 +62,10 @@ export class ScriptRunner {
 
         this._scriptNode.connect(this._fixSampleNode);
         this._fixSampleNode.connect(this._outputNode);
+    }
+
+    get scriptNode() {
+        return this._scriptNode;
     }
 
     get outputNode() {

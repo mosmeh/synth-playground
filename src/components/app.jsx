@@ -5,18 +5,26 @@ import React, {
     useCallback,
     useReducer,
 } from 'react';
+import SplitPane from 'react-split-pane';
+
 import { Header } from './header';
 import { ToolBar } from './tool-bar';
 import { Visualizer } from './visualizer';
 import { Editor } from './editor';
+import { ParamPane } from './param-pane';
 import { StatusBar } from './status-bar';
 import { OpenExampleDialog } from './open-example-dialog';
+
 import { ScriptRunner, Speaker, Analyzer, Recorder } from '../audio';
 import { DEFAULT_SCRIPT, NEW_SCRIPT } from '../templates';
 import { getExample } from '../examples';
 
 const SCRIPT_KEY = 'synth-playground-script';
 const VOLUME_KEY = 'synth-playground-volume';
+const PARAM_PANE_SIZE_KEY = 'synth-playground-param-pane-size';
+
+const paramPaneSize =
+    parseInt(localStorage.getItem(PARAM_PANE_SIZE_KEY), 10) || '20%';
 
 const inisitalState = {
     status: 'stopped',
@@ -125,7 +133,9 @@ export function App() {
     const [speaker, setSpeaker] = useState(null);
     const [analyzer, setAnalyzer] = useState(null);
     const [recorder, setRecorder] = useState(null);
+    const [audioParams, setAudioParams] = useState(() => new Map());
 
+    const splitPaneRef = useRef();
     const editorRef = useRef();
 
     // editor
@@ -141,6 +151,7 @@ export function App() {
     useEffect(() => {
         if (state.editorShouldRefresh) {
             editorRef.current.scrollToTop();
+            setAudioParams(new Map());
             dispatch({ type: 'on_editor_refresh' });
         }
     }, [state.editorShouldRefresh]);
@@ -205,11 +216,46 @@ export function App() {
         }
     }, [recorder, runner, state.recording, state.status]);
 
+    useEffect(() => {
+        if (state.status === 'running') {
+            setAudioParams((prev) => {
+                const next = new Map();
+                for (const [k, v] of runner.scriptNode.parameters) {
+                    const clamp = (x) =>
+                        Math.max(v.minValue, Math.min(v.maxValue, x));
+                    next.set(k, {
+                        value: clamp(prev.get(k)?.value ?? v.defaultValue),
+                        defaultValue: clamp(v.defaultValue),
+                        minValue: v.minValue,
+                        maxValue: v.maxValue,
+                    });
+                }
+                return next;
+            });
+        }
+    }, [runner, state.status]);
+
+    useEffect(() => {
+        if (state.status === 'running') {
+            for (const [k, v] of runner.scriptNode.parameters) {
+                if (audioParams.has(k)) {
+                    v.value = audioParams.get(k).value;
+                }
+            }
+        }
+    }, [audioParams, runner, state.status]);
+
     // event listeners
 
     useEventListener('beforeunload', () => {
         localStorage.setItem(SCRIPT_KEY, state.script);
         localStorage.setItem(VOLUME_KEY, volume);
+        if (splitPaneRef.current) {
+            localStorage.setItem(
+                PARAM_PANE_SIZE_KEY,
+                splitPaneRef.current.pane2.clientWidth
+            );
+        }
     });
 
     useEventListener('dragover', (e) => {
@@ -281,13 +327,26 @@ export function App() {
                 }
                 right={<Visualizer analyzer={analyzer} />}
             />
-            <Editor
-                ref={editorRef}
-                value={state.script}
-                onChange={handleEditorChange}
-                onRun={handleRun}
-                onStop={handleStop}
-            />
+            <SplitPane
+                ref={splitPaneRef}
+                split="vertical"
+                primary="second"
+                defaultSize={paramPaneSize}
+                minSize={200}
+                maxSize={-200}
+                style={{ height: 'calc(100% - 72px)' }}
+                pane1Style={{ overflow: 'hidden' }}
+                pane2Style={{ overflow: 'hidden' }}
+            >
+                <Editor
+                    ref={editorRef}
+                    value={state.script}
+                    onChange={handleEditorChange}
+                    onRun={handleRun}
+                    onStop={handleStop}
+                />
+                <ParamPane params={audioParams} setParams={setAudioParams} />
+            </SplitPane>
             <StatusBar status={state.status} />
             <OpenExampleDialog
                 isOpen={dialogIsOpen}

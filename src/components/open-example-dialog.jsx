@@ -21,7 +21,7 @@ export function OpenExampleDialog({ isOpen, onRequestClose, onSelect }) {
         >
             <div className="message">Choose an example</div>
             <ul className="list">{items}</ul>
-            <button className="close" onClick={onRequestClose}>
+            <button className="close button" onClick={onRequestClose}>
                 Close
             </button>
         </Modal>

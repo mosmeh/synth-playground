@@ -10,14 +10,50 @@ body,
     width: 100%;
     height: 100%;
     min-width: 500px;
-    min-height: 100px;
+    min-height: 150px;
 }
 
 .toolbar,
 button,
+.param-pane,
 .statusbar,
 .dialog {
     font-family: 'Open Sans', sans-serif;
+}
+
+.button {
+    font-size: 12px;
+    line-height: 28px;
+    vertical-align: middle;
+    color: #007aff;
+    background-color: #fff;
+    padding: 0 8px;
+    margin: 0px 8px 0px 0;
+    border: 1px solid #f0f0f0;
+    cursor: pointer;
+}
+
+.button:focus,
+.button:hover {
+    color: #007aff;
+    background-color: #f0f0f0;
+}
+
+.button.highlighted {
+    color: #fff;
+    background-color: #007af4;
+}
+
+.button.highlighted:focus,
+.button.highlighted:hover {
+    color: #fff;
+    background-color: #006ae4;
+}
+
+.button:active,
+.button.highlighted:active {
+    color: #007aff;
+    background-color: #d7d7d7;
 }
 
 .header {
@@ -50,49 +86,10 @@ button,
     vertical-align: -6px;
 }
 
-.toolbar span,
-.toolbar button p {
+.toolbar span {
     font-size: 12px;
     line-height: 28px;
     vertical-align: middle;
-}
-
-.toolbar button {
-    color: #007aff;
-    background-color: #fff;
-    padding: 0 8px;
-    margin: 0px 8px 0px 0;
-    border: 1px solid #f0f0f0;
-    cursor: pointer;
-}
-
-.toolbar button:focus,
-.toolbar button:hover {
-    color: #007aff;
-    background-color: #f0f0f0;
-}
-
-.toolbar button.highlighted {
-    color: #fff;
-    background-color: #007af4;
-}
-
-.toolbar button.highlighted:focus,
-.toolbar button.highlighted:hover {
-    color: #fff;
-    background-color: #006ae4;
-}
-
-.toolbar button:active,
-.toolbar button.highlighted:active {
-    color: #007aff;
-    background-color: #d7d7d7;
-}
-
-.toolbar button:disabled {
-    color: #fff;
-    background-color: #999;
-    cursor: default;
 }
 
 .toolbar input[type='range'] {
@@ -111,31 +108,104 @@ button,
     padding-left: 3px;
 }
 
-@media screen and (max-width: 1284px) {
-    .oscilloscope {
+@media screen and (max-width: 1267px) {
+    .visualizer .oscilloscope {
         display: none;
     }
 }
 
-@media screen and (max-width: 1031px) {
-    .title,
+@media screen and (max-width: 1014px) {
+    .toolbar .title,
     button.foldable span {
         display: none;
     }
+    button.foldable {
+        margin-right: 0;
+    }
 }
 
-@media screen and (max-width: 741px) {
-    .spectrum-analyzer {
+@media screen and (max-width: 676px) {
+    .visualizer .spectrum-analyzer {
         display: none;
     }
 }
 
 .editor {
     width: 100%;
-    height: calc(100% - 72px);
+    height: 100%;
+}
+
+.param-pane {
+    min-width: 200px;
+    height: 100%;
+    font-size: 14px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.param-header {
+    padding: 10px;
+    line-height: 28px;
+    border-bottom: 1px solid #ccc;
+}
+
+.param-header .title {
+    color: #007aff;
+}
+
+.param-header .reset {
+    float: right;
+    font-size: 13px;
+}
+
+.param-body {
+    padding: 10px;
+    flex-grow: 1;
+    overflow-y: scroll;
+}
+
+.param-body ul {
+    list-style: none;
+}
+
+.param-body li {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.param-body .name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.param-body .input-container {
+    display: flex;
+    height: 24px;
+}
+
+.param-body input[type='range'] {
+    cursor: pointer;
+    flex-grow: 1;
+}
+
+.param-body input[type='number'] {
+    width: 100px;
+    margin-left: 8px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+}
+
+.param-body input[type='number']:focus {
+    border-bottom: 2px solid #000;
 }
 
 .statusbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     font-size: 12px;
     color: #fff;
     padding-left: 10px;
@@ -179,24 +249,11 @@ button,
     bottom: 0;
     right: 0;
     margin: 8px;
-    text-align: center;
     font-size: 14px;
     height: 36px;
     line-height: 36px;
     min-width: 64px;
     cursor: pointer;
-    color: #3a76ff;
-    background-color: #fafafa;
-    border: none;
-}
-
-.dialog .close:focus,
-.dialog .close:hover {
-    background-color: #ddd;
-}
-
-.dialog .close:active {
-    background-color: #ccc;
 }
 
 .dialog .list {
@@ -237,8 +294,30 @@ button,
     background-color: #d7d7d7;
 }
 
-.toolbar button:focus,
-.dialog:focus,
-.dialog .close:focus {
+.button:focus,
+.param-body input[type='number']:focus,
+.dialog:focus {
     outline: 0;
+}
+
+.Resizer {
+    background: #000;
+    opacity: 0.2;
+    z-index: 1;
+    box-sizing: border-box;
+    background-clip: padding-box;
+}
+
+.Resizer.vertical {
+    width: 11px;
+    margin: 0;
+    margin-right: -5px;
+    border-left: 5px solid rgba(255, 255, 255, 0);
+    border-right: 5px solid rgba(255, 255, 255, 0);
+    cursor: col-resize;
+}
+
+.Resizer.vertical:hover {
+    border-left: 5px solid rgba(0, 0, 0, 0.5);
+    border-right: 5px solid rgba(0, 0, 0, 0.5);
 }

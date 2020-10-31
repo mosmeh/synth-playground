@@ -68,7 +68,7 @@ function Button({ label, title = label, icon, highlighted = false, onClick }) {
     return (
         <button
             title={title}
-            className={`foldable ${highlighted ? 'highlighted' : ''}`}
+            className={`button foldable ${highlighted ? 'highlighted' : ''}`}
             onClick={onClick}
         >
             <p>
@@ -96,7 +96,11 @@ function OpenFileButton({ onOpen }) {
     );
 
     return (
-        <button title="Open file" className="foldable" onClick={handleClick}>
+        <button
+            title="Open file"
+            className="button foldable"
+            onClick={handleClick}
+        >
             <input
                 ref={ref}
                 type="file"
@@ -127,7 +131,7 @@ function Volume({ value, onChange }) {
                 type="range"
                 min="0"
                 max="1"
-                step="0.05"
+                step="any"
                 value={value}
                 onChange={handleChange}
             />
