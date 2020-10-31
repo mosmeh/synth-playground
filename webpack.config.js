@@ -3,6 +3,7 @@ const process = require('process');
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
@@ -21,16 +22,24 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.jsx?$/,
+                test: /\.jsx?$/i,
                 exclude: /node_modules/,
                 use: 'babel-loader',
             },
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader'],
+                test: /\.css$/i,
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            publicPath: '',
+                        },
+                    },
+                    'css-loader',
+                ],
             },
             {
-                test: /\.ttf$/,
+                test: /\.ttf$/i,
                 use: 'file-loader',
             },
         ],
@@ -47,6 +56,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, 'src', 'index.html'),
         }),
+        new MiniCssExtractPlugin(),
         new CopyPlugin({
             patterns: [
                 {
