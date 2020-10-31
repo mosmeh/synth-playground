@@ -2,16 +2,40 @@
 
 const AMP = 0.2;
 let t = 0;
+let phase = 0;
 
 class Processor extends AudioWorkletProcessor {
-    process(_, outputs) {
+    static get parameterDescriptors() {
+        return [
+            {
+                name: 'Duty cycle',
+                defaultValue: 0.5,
+                minValue: 0,
+                maxValue: 1,
+            },
+            {
+                name: 'PolyBLEP',
+                defaultValue: 1,
+                minValue: 0,
+                maxValue: 1,
+            },
+        ];
+    }
+    process(_, outputs, params) {
+        const duty = params['Duty cycle'][0];
+        const mix = params['PolyBLEP'][0];
+
         const outL = outputs[0][0];
         const outR = outputs[0][1];
         for (let i = 0; i < outL.length; ++i) {
             const freq = t < 0.075 ? 990 : 1320;
             const env = t < 0.075 ? 1 : Math.max(0, 1 - (t - 0.075) / 0.825);
-            outL[i] = outR[i] = AMP * env * square(freq, t);
+            const x =
+                (1 - mix) * square(phase, duty) +
+                mix * polyBlepSquare(phase, freq / sampleRate, duty);
+            outL[i] = outR[i] = AMP * env * x;
             t += 1 / sampleRate;
+            phase += freq / sampleRate;
         }
         return true;
     }
@@ -19,15 +43,18 @@ class Processor extends AudioWorkletProcessor {
 
 registerProcessor('main', Processor);
 
+function square(phase, duty = 0.5) {
+    return phase % 1 < duty ? 1 : -1;
+}
+
 // Based on https://github.com/Archie3d/qmusic/blob/master/source/plugins/au-generator/src/Generator.cpp
 
-function square(f, t) {
-    const PULSE_WIDTH = 0.5;
-    const phase = (f * t) % 1;
-    const dt = f / sampleRate;
-    const raw = phase < PULSE_WIDTH ? 1 : -1;
+function polyBlepSquare(phase, dt, duty = 0.5) {
+    phase %= 1;
     return (
-        raw + polyBlep(phase, dt) - polyBlep((phase + 1 - PULSE_WIDTH) % 1, dt)
+        square(phase, duty) +
+        polyBlep(phase, dt) -
+        polyBlep((phase + 1 - duty) % 1, dt)
     );
 }
 

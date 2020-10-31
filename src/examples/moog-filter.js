@@ -4,7 +4,7 @@ const AMP = 0.3;
 
 class MoogFilter {
     constructor(cutoff, resonance) {
-        this.cutoff = cutoff || 1;
+        this.cutoff = cutoff || sampleRate;
         this.resonance = resonance || 0;
         this._in1 = this._in2 = this._in3 = this._in4 = 0;
         this._out1 = this._out2 = this._out3 = this._out4 = 0;
@@ -13,7 +13,7 @@ class MoogFilter {
         return this._out4;
     }
     process(x) {
-        const f = this.cutoff * 1.16;
+        const f = (this.cutoff / sampleRate) * 1.16;
         const fb = this.resonance * (1.0 - 0.15 * f * f);
         x -= this._out4 * fb;
         x *= 0.35013 * (f * f) * (f * f);
@@ -80,20 +80,47 @@ const delay = [new Delay(0.4, 0.5, 0.4), new Delay(0.5, 0.5, 0.4)];
 let t = 0;
 
 class Processor extends AudioWorkletProcessor {
-    process(_, outputs) {
+    static get parameterDescriptors() {
+        return [
+            {
+                name: 'Cutoff',
+                defaultValue: 21,
+                minValue: 0,
+                maxValue: 40,
+            },
+            {
+                name: 'Resonance',
+                defaultValue: 3.8,
+                minValue: 0,
+                maxValue: 4,
+            },
+            {
+                name: 'Attack',
+                defaultValue: 1,
+                minValue: 0,
+                maxValue: 2,
+            },
+        ];
+    }
+    process(_, outputs, params) {
+        const cutoff = params['Cutoff'][0] * 1000;
+        const attack = params['Attack'][0];
+        lowpass.resonance = params['Resonance'][0];
+        filterEnv.a = attack;
+
         const outL = outputs[0][0];
         const outR = outputs[0][1];
         for (let i = 0; i < outL.length; ++i) {
             const noise = Math.random() * 2 - 1;
 
-            lowpass.cutoff = 0.5 * filterEnv.update();
+            lowpass.cutoff = cutoff * filterEnv.update();
             const x = ampEnv.update() * lowpass.process(noise);
 
             outL[i] = AMP * delay[0].process(x);
             outR[i] = AMP * delay[1].process(x);
 
             t += 1 / sampleRate;
-            if (t > 1.5) {
+            if (t > attack + 0.5) {
                 ampEnv.release();
                 filterEnv.release();
             }
