@@ -9,25 +9,31 @@ export function Visualizer({ analyzer }) {
     );
 }
 
+const WIDTH = 250;
+const HEIGHT = 48;
+
 function Oscilloscope({ analyzer }) {
     const canvasRef = useRef();
 
     useEffect(() => {
+        canvasRef.current
+            .getContext('2d')
+            .scale(window.devicePixelRatio, window.devicePixelRatio);
+    }, []);
+
+    useEffect(() => {
         let requestId = null;
         function draw() {
-            const canvas = canvasRef.current;
-            const width = canvas.width;
-            const height = canvas.height;
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, width, height);
+            const context = canvasRef.current.getContext('2d');
+            context.clearRect(0, 0, WIDTH, HEIGHT);
 
             context.lineWidth = 2;
             context.strokeStyle = '#007aff';
             context.beginPath();
 
             if (analyzer === null) {
-                context.moveTo(0, height / 2);
-                context.lineTo(width, height / 2);
+                context.moveTo(0, HEIGHT / 2);
+                context.lineTo(WIDTH, HEIGHT / 2);
                 context.stroke();
                 return;
             }
@@ -36,7 +42,7 @@ function Oscilloscope({ analyzer }) {
 
             // draw a range of half the window size to prevent right ends of waveforms from being chopped off
             const drawLength = timeData.length / 2;
-            const sliceWidth = (width / timeData.length) * 2;
+            const sliceWidth = (WIDTH / timeData.length) * 2;
 
             // SidWizPlus' PeakSpeedTrigger
             // https://github.com/maxim-zhao/SidWizPlus/blob/master/LibSidWiz/Triggers/PeakSpeedTrigger.cs
@@ -72,10 +78,10 @@ function Oscilloscope({ analyzer }) {
 
             for (
                 let x = 0, i = triggerIndex;
-                x <= width && i < timeData.length;
+                x <= WIDTH && i < timeData.length;
                 x += sliceWidth, ++i
             ) {
-                context.lineTo(x, ((255 - timeData[i]) / 255) * height);
+                context.lineTo(x, ((255 - timeData[i]) / 255) * HEIGHT);
             }
             context.stroke();
 
@@ -90,8 +96,8 @@ function Oscilloscope({ analyzer }) {
         <canvas
             ref={canvasRef}
             className="oscilloscope"
-            width="250"
-            height="48"
+            width={WIDTH * window.devicePixelRatio}
+            height={HEIGHT * window.devicePixelRatio}
         />
     );
 }
@@ -102,13 +108,16 @@ function SpectrumAnalyzer({ analyzer }) {
     const canvasRef = useRef();
 
     useEffect(() => {
+        canvasRef.current
+            .getContext('2d')
+            .scale(window.devicePixelRatio, window.devicePixelRatio);
+    }, []);
+
+    useEffect(() => {
         let requestId = null;
         function draw() {
-            const canvas = canvasRef.current;
-            const width = canvas.width;
-            const height = canvas.height;
-            const context = canvas.getContext('2d');
-            context.clearRect(0, 0, width, height);
+            const context = canvasRef.current.getContext('2d');
+            context.clearRect(0, 0, WIDTH, HEIGHT);
 
             if (analyzer === null) {
                 return;
@@ -117,7 +126,7 @@ function SpectrumAnalyzer({ analyzer }) {
             const freqData = analyzer.getByteFrequencyData();
 
             // DC bias
-            const y = ((255 - freqData[0]) / 255) * height;
+            const y = ((255 - freqData[0]) / 255) * HEIGHT;
             context.beginPath();
             context.moveTo(0, y);
 
@@ -128,14 +137,14 @@ function SpectrumAnalyzer({ analyzer }) {
                 const x =
                     ((Math.log10(i) + binWidth - MIN_FREQ) /
                         (maxFreq - MIN_FREQ)) *
-                    width;
-                const y = ((255 - freqData[i]) / 255) * height;
+                    WIDTH;
+                const y = ((255 - freqData[i]) / 255) * HEIGHT;
 
                 context.lineTo(x, y);
             }
 
-            context.lineTo(width, height);
-            context.lineTo(0, height);
+            context.lineTo(WIDTH, HEIGHT);
+            context.lineTo(0, HEIGHT);
             context.closePath();
 
             context.fillStyle = '#007aff';
@@ -152,8 +161,8 @@ function SpectrumAnalyzer({ analyzer }) {
         <canvas
             ref={canvasRef}
             className="spectrum-analyzer"
-            width="250"
-            height="48"
+            width={WIDTH * window.devicePixelRatio}
+            height={HEIGHT * window.devicePixelRatio}
         />
     );
 }

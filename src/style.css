@@ -105,6 +105,8 @@ button,
 }
 
 .visualizer canvas {
+    width: 250px;
+    height: 48px;
     padding-left: 3px;
 }
 
