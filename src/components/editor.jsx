@@ -4,7 +4,7 @@ import React, {
     useImperativeHandle,
     forwardRef,
 } from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor, { monaco } from 'react-monaco-editor';
 import AUDIO_WORKLET_LIB from '!!raw-loader!../audio-worklet-lib';
 
 const OPTIONS = {
